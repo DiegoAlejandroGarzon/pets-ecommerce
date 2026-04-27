@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ config('app.name', 'Pets Store') }}</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Scripts & Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+</head>
+<body class="font-sans antialiased bg-gray-50 text-gray-900">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <a href="/" class="text-2xl font-bold text-indigo-600 tracking-tight">PetsStore</a>
+                    <div class="hidden md:ml-10 md:flex space-x-8">
+                        <a href="/" class="text-gray-600 hover:text-indigo-600 transition duration-150 font-medium">Catálogo</a>
+                        <a href="/categories" class="text-gray-600 hover:text-indigo-600 transition duration-150 font-medium">Categorías</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/cart" class="relative text-gray-600 hover:text-indigo-600 transition duration-150 p-2 rounded-full hover:bg-indigo-50">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </a>
+                    @auth
+                        <a href="/profile" class="text-gray-600 hover:text-indigo-600 font-medium">Mi Cuenta</a>
+                    @else
+                        <a href="/login" class="text-gray-600 hover:text-indigo-600 font-medium">Ingresar</a>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-8">
+        {{ $slot }}
+    </main>
+
+    <footer class="bg-white border-t mt-12 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; {{ date('Y') }} PetsStore. Todo lo que tu mascota necesita.</p>
+        </div>
+    </footer>
+
+    @livewireScripts
+</body>
+</html>
