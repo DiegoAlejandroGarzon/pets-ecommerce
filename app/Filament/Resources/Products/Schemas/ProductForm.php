@@ -17,6 +17,7 @@ class ProductForm
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (string $operation, $state, \Filament\Forms\Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
                         \Filament\Forms\Components\TextInput::make('slug')
+                            ->label('Slug')
                             ->required()
                             ->unique(\App\Models\Product::class, 'slug', ignoreRecord: true),
                         \Filament\Forms\Components\TextInput::make('brand'),

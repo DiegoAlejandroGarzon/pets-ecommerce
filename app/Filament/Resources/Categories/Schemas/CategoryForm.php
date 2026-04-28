@@ -16,6 +16,7 @@ class CategoryForm
                     ->live(onBlur: true)
                     ->afterStateUpdated(fn (string $operation, $state, \Filament\Forms\Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
                 \Filament\Forms\Components\TextInput::make('slug')
+                    ->label('Slug')
                     ->required()
                     ->unique(Category::class, 'slug', ignoreRecord: true),
                 \Filament\Forms\Components\Select::make('parent_id')
