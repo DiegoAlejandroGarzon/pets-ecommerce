@@ -107,11 +107,6 @@ $submitOrder = function () {
             'external_reference' => (string) $order->id,
         ];
 
-        \Illuminate\Support\Facades\Log::info('MercadoPago Request Data', [
-            'url' => config('app.url'),
-            'data' => $paymentData
-        ]);
-
         $response = Http::withToken($mpToken)->post('https://api.mercadopago.com/checkout/preferences', $paymentData);
 
         if ($response->successful()) {
@@ -123,14 +118,14 @@ $submitOrder = function () {
             // Redirect to Mercado Pago checkout
             return redirect()->away($preference['init_point']);
         } else {
-            session()->flash('error', 'Error de Mercado Pago: ' . $response->body());
+            session()->flash('error', 'Ocurrió un error al conectar con la pasarela de pagos. Por favor intenta de nuevo.');
             $this->processing = false;
             return;
         }
     } catch (\Exception $e) {
         DB::rollBack();
         $this->processing = false;
-        session()->flash('error', 'Ocurrió un error: ' . $e->getMessage());
+        session()->flash('error', 'Ocurrió un error al procesar tu pedido.');
     }
 };
 
