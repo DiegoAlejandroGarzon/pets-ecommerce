@@ -116,7 +116,7 @@ $submitOrder = function () {
             // Redirect to Mercado Pago checkout
             return redirect()->away($preference['init_point']);
         } else {
-            session()->flash('error', 'Error de conexión con Mercado Pago');
+            session()->flash('error', 'Error de Mercado Pago: ' . $response->body());
             $this->processing = false;
             return;
         }
