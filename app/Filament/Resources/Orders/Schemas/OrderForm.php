@@ -29,7 +29,7 @@ class OrderForm
                     ->required()
                     ->default('pending'),
                 \Filament\Forms\Components\TextInput::make('tracking_code'),
-                \Filament\Forms\Components\Section::make('Shipping Data')
+                \Filament\Schemas\Components\Section::make('Shipping Data')
                     ->schema([
                         \Filament\Forms\Components\KeyValue::make('shipping_data'),
                     ])->collapsible(),

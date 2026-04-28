@@ -10,7 +10,7 @@ class ProductForm
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\Section::make('Basic Information')
+                \Filament\Schemas\Components\Section::make('Basic Information')
                     ->schema([
                         \Filament\Forms\Components\TextInput::make('name')
                             ->required()

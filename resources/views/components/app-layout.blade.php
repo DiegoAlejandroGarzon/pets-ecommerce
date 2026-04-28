@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Pets Store') }}</title>
+    <title>{{ config('app.name', 'Consentidos & Traviesos') }}</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,22 +17,22 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
-                    <a href="/" class="text-2xl font-bold text-indigo-600 tracking-tight">PetsStore</a>
+                    <a href="/" class="text-2xl font-bold text-orange-800 tracking-tight">Consentidos<span class="text-amber-600">&</span>Traviesos</a>
                     <div class="hidden md:ml-10 md:flex space-x-8">
-                        <a href="/" class="text-gray-600 hover:text-indigo-600 transition duration-150 font-medium">Catálogo</a>
-                        <a href="/categories" class="text-gray-600 hover:text-indigo-600 transition duration-150 font-medium">Categorías</a>
+                        <a href="/" class="text-gray-600 hover:text-orange-700 transition duration-150 font-medium">Catálogo</a>
+                        <a href="/categories" class="text-gray-600 hover:text-orange-700 transition duration-150 font-medium">Categorías</a>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="/cart" class="relative text-gray-600 hover:text-indigo-600 transition duration-150 p-2 rounded-full hover:bg-indigo-50">
+                    <a href="/cart" class="relative text-gray-600 hover:text-orange-700 transition duration-150 p-2 rounded-full hover:bg-orange-50">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                     </a>
                     @auth
-                        <a href="/profile" class="text-gray-600 hover:text-indigo-600 font-medium">Mi Cuenta</a>
+                        <a href="/admin" class="text-gray-600 hover:text-orange-700 font-medium">Administrar</a>
                     @else
-                        <a href="/login" class="text-gray-600 hover:text-indigo-600 font-medium">Ingresar</a>
+                        <a href="/admin" class="text-gray-600 hover:text-orange-700 font-medium">Ingresar</a>
                     @endauth
                 </div>
             </div>
@@ -45,7 +45,7 @@
 
     <footer class="bg-white border-t mt-12 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-            <p>&copy; {{ date('Y') }} PetsStore. Todo lo que tu mascota necesita.</p>
+            <p>&copy; {{ date('Y') }} Consentidos & Traviesos. Todo lo que tu mejor amigo merece.</p>
         </div>
     </footer>
 
