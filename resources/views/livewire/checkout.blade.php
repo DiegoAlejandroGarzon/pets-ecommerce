@@ -5,6 +5,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Facades\Http;
+
 state([
     'cart' => [],
     'name' => '',
@@ -68,17 +70,53 @@ $submitOrder = function () {
                 'price' => $item['price']
             ]);
         }
-
+        
         DB::commit();
+
+        // Mercado Pago Integration
+        $mpToken = config('services.mercadopago.access_token');
         
-        session()->forget('cart');
-        session()->flash('order_id', $order->id);
-        
-        return redirect()->to('/success');
+        if (!$mpToken) {
+            throw new \Exception('Mercado Pago no está configurado (Falta Token).');
+        }
+
+        $items = [];
+        foreach ($this->cart as $item) {
+            $items[] = [
+                'title' => $item['name'],
+                'quantity' => (int) $item['quantity'],
+                'unit_price' => (float) $item['price'],
+                'currency_id' => 'COP'
+            ];
+        }
+
+        $response = Http::withToken($mpToken)
+            ->post('https://api.mercadopago.com/checkout/preferences', [
+                'items' => $items,
+                'back_urls' => [
+                    'success' => route('payment.success', ['order' => $order->id]),
+                    'failure' => route('payment.failure', ['order' => $order->id]),
+                    'pending' => route('payment.pending', ['order' => $order->id]),
+                ],
+                'auto_return' => 'approved',
+                'external_reference' => (string) $order->id,
+            ]);
+
+        if ($response->successful()) {
+            $preference = $response->json();
+            
+            session()->forget('cart');
+            session()->flash('order_id', $order->id);
+            
+            // Redirect to Mercado Pago checkout
+            return redirect()->away($preference['init_point']);
+        } else {
+            throw new \Exception('Error al comunicarse con Mercado Pago: ' . $response->body());
+        }
     } catch (\Exception $e) {
         DB::rollBack();
         $this->processing = false;
-        session()->flash('error', 'Ocurrió un error al procesar tu pedido. Por favor intenta de nuevo.');
+        session()->flash('error', 'Ocurrió un error: ' . $e->getMessage());
     }
 };
 

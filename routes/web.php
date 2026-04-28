@@ -18,6 +18,13 @@ Route::get('/checkout', function () {
     return view('checkout');
 })->name('checkout');
 
+use App\Http\Controllers\PaymentController;
+
+Route::get('/payment/success/{order}', [PaymentController::class, 'success'])->name('payment.success');
+Route::get('/payment/failure/{order}', [PaymentController::class, 'failure'])->name('payment.failure');
+Route::get('/payment/pending/{order}', [PaymentController::class, 'pending'])->name('payment.pending');
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
+
 Route::get('/success', function () {
     return view('success');
 })->name('success');
