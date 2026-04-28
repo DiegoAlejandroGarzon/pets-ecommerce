@@ -96,7 +96,7 @@ $submitOrder = function () {
             ];
         }
 
-        $response = Http::withToken($mpToken)->post('https://api.mercadopago.com/checkout/preferences', [
+        $paymentData = [
             'items' => $items,
             'back_urls' => [
                 'success' => route('payment.success', ['order' => $order->id]),
@@ -105,7 +105,14 @@ $submitOrder = function () {
             ],
             'auto_return' => 'approved',
             'external_reference' => (string) $order->id,
+        ];
+
+        \Illuminate\Support\Facades\Log::info('MercadoPago Request Data', [
+            'url' => config('app.url'),
+            'data' => $paymentData
         ]);
+
+        $response = Http::withToken($mpToken)->post('https://api.mercadopago.com/checkout/preferences', $paymentData);
 
         if ($response->successful()) {
             $preference = $response->json();
