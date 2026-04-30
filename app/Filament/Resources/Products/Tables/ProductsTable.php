@@ -13,6 +13,9 @@ class ProductsTable
     {
         return $table
             ->columns([
+                \Filament\Tables\Columns\SpatieMediaLibraryImageColumn::make('image')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/placeholder.png')),
                 \Filament\Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),

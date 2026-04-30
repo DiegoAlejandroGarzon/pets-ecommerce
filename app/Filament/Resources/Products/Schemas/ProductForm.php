@@ -12,6 +12,13 @@ class ProductForm
             ->components([
                 \Filament\Schemas\Components\Section::make('Basic Information')
                     ->schema([
+                        \Filament\Forms\Components\SpatieMediaLibraryFileUpload::make('image')
+                            ->image()
+                            ->imageEditor()
+                            ->imageResizeMode('contain')
+                            ->imageResizeTargetWidth('1000')
+                            ->imageResizeTargetHeight('1000')
+                            ->columnSpanFull(),
                         \Filament\Forms\Components\TextInput::make('name')
                             ->required()
                             ->live(onBlur: true)

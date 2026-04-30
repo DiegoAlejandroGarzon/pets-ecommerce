@@ -22,7 +22,7 @@ $addToCart = function () {
             "name" => $this->product->name,
             "quantity" => $this->quantity,
             "price" => $this->selectedVariant->price,
-            "image" => "" // Placeholder for now
+            "image" => $this->product->getFirstMediaUrl('default')
         ];
     }
     
@@ -42,10 +42,14 @@ $addToCart = function () {
 
     <div class="lg:flex lg:items-start lg:gap-12">
         <div class="lg:w-1/2">
-            <div class="aspect-square bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400">
-                <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
+            <div class="aspect-square bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 overflow-hidden shadow-sm">
+                @if($product->hasMedia('default'))
+                    <img src="{{ $product->getFirstMediaUrl('default') }}" alt="{{ $product->name }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                @else
+                    <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                @endif
             </div>
         </div>
 
