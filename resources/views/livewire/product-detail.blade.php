@@ -1,31 +1,35 @@
 <?php
 
-use function Livewire\Volt\{state, mount};
+use function Livewire\Volt\{state, mount, computed};
 use App\Models\Product;
 
-state(['product' => null, 'quantity' => 1, 'selectedVariant' => null]);
+state(['product' => null, 'quantity' => 1, 'selectedVariantId' => null]);
 
 mount(function (Product $product) {
     $this->product = $product->load(['category', 'variants']);
-    $this->selectedVariant = $this->product->variants->first();
+    $this->selectedVariantId = $this->product->variants->first()?->id;
+});
+
+$selectedVariant = computed(function () {
+    return $this->product->variants->firstWhere('id', $this->selectedVariantId);
 });
 
 $addToCart = function () {
     $cart = session()->get('cart', []);
-    
-    $id = $this->selectedVariant->id;
-    
-    if(isset($cart[$id])) {
+    $variant = $this->selectedVariant;
+    $id = $variant->id;
+
+    if (isset($cart[$id])) {
         $cart[$id]['quantity'] += $this->quantity;
     } else {
         $cart[$id] = [
-            "name" => $this->product->name,
+            "name"     => $this->product->name,
             "quantity" => $this->quantity,
-            "price" => $this->selectedVariant->price,
-            "image" => $this->product->getFirstMediaUrl('default')
+            "price"    => $variant->price,
+            "image"    => $this->product->getFirstMediaUrl('default'),
         ];
     }
-    
+
     session()->put('cart', $cart);
     $this->dispatch('cart-updated');
     session()->flash('success', 'Producto añadido al carrito');
@@ -61,10 +65,18 @@ $addToCart = function () {
             </nav>
 
             <h1 class="text-4xl font-black text-gray-900 mb-2">{{ $product->name }}</h1>
-            <p class="text-lg text-gray-600 mb-6">{{ $product->brand }}</p>
+            <p class="text-lg text-gray-600 mb-4">{{ $product->brand }}</p>
 
-            <div class="text-3xl font-bold text-orange-600 mb-8">
-                ${{ number_format($selectedVariant->price, 2) }}
+            {{-- Precio y peso se actualizan al cambiar la variante --}}
+            <div class="mb-6">
+                <div class="text-3xl font-bold text-orange-600">
+                    ${{ number_format($this->selectedVariant->price, 0, ',', '.') }}
+                </div>
+                @if($this->selectedVariant->weight)
+                    <div class="mt-1 text-sm text-gray-500 font-medium">
+                        Presentación: <span class="text-gray-700">{{ $this->selectedVariant->weight }} kg</span>
+                    </div>
+                @endif
             </div>
 
             <div class="prose prose-orange mb-8">
@@ -76,12 +88,15 @@ $addToCart = function () {
                     <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Opciones disponibles</label>
                     <div class="grid grid-cols-2 gap-3">
                         @foreach($product->variants as $variant)
-                            <button 
-                                wire:click="$set('selectedVariant', {{ $variant->id }})"
-                                class="border-2 p-3 rounded-xl text-left transition duration-150 {{ $selectedVariant->id === $variant->id ? 'border-orange-600 bg-orange-50' : 'border-gray-200 hover:border-orange-300' }}"
+                            <button
+                                wire:click="$set('selectedVariantId', {{ $variant->id }})"
+                                class="border-2 p-3 rounded-xl text-left transition duration-150 {{ $selectedVariantId === $variant->id ? 'border-orange-600 bg-orange-50' : 'border-gray-200 hover:border-orange-300' }}"
                             >
-                                <span class="block font-bold">{{ implode(', ', $variant->attributes ?? ['Estándar']) }}</span>
-                                <span class="text-sm text-gray-500">${{ number_format($variant->price, 2) }}</span>
+                                <span class="block font-bold text-sm">{{ implode(', ', $variant->attributes ?? ['Estándar']) }}</span>
+                                @if($variant->weight)
+                                    <span class="block text-xs text-gray-500">{{ $variant->weight }} kg</span>
+                                @endif
+                                <span class="block text-sm font-semibold text-orange-600 mt-1">${{ number_format($variant->price, 0, ',', '.') }}</span>
                             </button>
                         @endforeach
                     </div>
