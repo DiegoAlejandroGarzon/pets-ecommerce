@@ -238,7 +238,7 @@ $prepareOrder = function () {
 
             var handler = ePayco.checkout.configure({
                 key: "{{ env('EPAYCO_PUBLIC_KEY') }}",
-                test: {{ env('EPAYCO_TESTING', 'true') ? 'true' : 'false' }}
+                test: {{ env('EPAYCO_TESTING', 'true') === 'true' ? 'true' : 'false' }}
             });
 
             handler.open({
