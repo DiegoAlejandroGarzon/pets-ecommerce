@@ -5,8 +5,6 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 
-use Illuminate\Support\Facades\Http;
-
 state([
     'cart' => [],
     'name' => '',
@@ -39,7 +37,7 @@ $total = computed(function () {
     );
 });
 
-$submitOrder = function () {
+$prepareOrder = function () {
     $this->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|max:255',
@@ -77,55 +75,19 @@ $submitOrder = function () {
 
         DB::commit();
 
-        // Mercado Pago Integration
-        $mpToken = config('services.mercadopago.access_token');
+        $this->dispatch('open-epayco', [
+            'orderId'   => $order->id,
+            'total'     => $this->total,
+            'name'      => $this->name,
+            'address'   => $this->address,
+            'phone'     => $this->phone,
+            'email'     => $this->email,
+        ]);
 
-        if (empty($mpToken)) {
-            session()->flash('error', 'Mercado Pago no está configurado. Revisa tu archivo .env');
-            $this->processing = false;
-            return;
-        }
-
-        $items = [];
-        foreach ($this->cart as $item) {
-            $items[] = [
-                'title' => $item['name'],
-                'quantity' => (int) $item['quantity'],
-                'unit_price' => (float) $item['price'],
-                'currency_id' => 'COP',
-            ];
-        }
-
-        $paymentData = [
-            'items' => $items,
-            'back_urls' => [
-                'success' => route('payment.success', ['order' => $order->id]),
-                'failure' => route('payment.failure', ['order' => $order->id]),
-                'pending' => route('payment.pending', ['order' => $order->id]),
-            ],
-            'auto_return' => 'approved',
-            'external_reference' => (string) $order->id,
-        ];
-
-        $response = Http::withToken($mpToken)->post('https://api.mercadopago.com/checkout/preferences', $paymentData);
-
-        if ($response->successful()) {
-            $preference = $response->json();
-
-            session()->forget('cart');
-            session()->flash('order_id', $order->id);
-
-            // Redirect to Mercado Pago checkout
-            return redirect()->away($preference['init_point']);
-        } else {
-            session()->flash('error', 'Ocurrió un error al conectar con la pasarela de pagos. Por favor intenta de nuevo.');
-            $this->processing = false;
-            return;
-        }
     } catch (\Exception $e) {
         DB::rollBack();
         $this->processing = false;
-        session()->flash('error', 'Ocurrió un error al procesar tu pedido.');
+        session()->flash('error', 'Ocurrió un error al procesar tu pedido. Intenta de nuevo.');
     }
 };
 
@@ -206,19 +168,14 @@ $submitOrder = function () {
                 </h2>
                 <div class="p-4 border-2 border-orange-600 bg-orange-50 rounded-2xl flex items-center justify-between">
                     <div>
-                        <p class="font-bold text-gray-900">Mercado Pago</p>
-                        <p class="text-sm text-gray-600">Paga de forma segura con Tarjeta, PSE o Efectivo.</p>
+                        <p class="font-bold text-gray-900">ePayco (Davivienda)</p>
+                        <p class="text-sm text-gray-600">Paga de forma segura con Tarjeta, PSE o Efecty.</p>
                     </div>
                     <div class="text-orange-600">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clip-rule="evenodd" />
-                        </svg>
+                        <img src="https://multimedia.epayco.co/epayco-landing/btns/epayco-logo-fondo-oscuro.png" alt="ePayco" class="h-8">
                     </div>
                 </div>
-                <p class="mt-4 text-xs text-gray-500 italic">* Tu pago será procesado por la plataforma segura de
-                    Mercado Pago.</p>
+                <p class="mt-4 text-xs text-gray-500 italic">* Tu pago será procesado por la plataforma segura de ePayco Colombia.</p>
             </div>
         </div>
 
@@ -261,10 +218,10 @@ $submitOrder = function () {
                     </div>
                 </div>
 
-                <button wire:click="submitOrder" wire:loading.attr="disabled"
-                    class="w-full bg-gray-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-black transition duration-150 shadow-xl disabled:opacity-50">
-                    <span wire:loading.remove>REALIZAR PEDIDO</span>
-                    <span wire:loading>PROCESANDO...</span>
+                <button wire:click="prepareOrder" wire:loading.attr="disabled"
+                    class="w-full bg-gray-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-black transition duration-150 shadow-xl disabled:opacity-60">
+                    <span wire:loading.remove wire:target="prepareOrder">REALIZAR PAGO CON EPAYCO</span>
+                    <span wire:loading wire:target="prepareOrder">Procesando...</span>
                 </button>
                 <p class="text-center text-xs text-gray-400 mt-4 uppercase tracking-tighter font-bold">Compra 100%
                     Segura</p>
@@ -272,3 +229,37 @@ $submitOrder = function () {
         </div>
     </div>
 </div>
+
+<script type="text/javascript" src="https://checkout.epayco.co/checkout.js"></script>
+<script>
+    document.addEventListener('livewire:init', function () {
+        Livewire.on('open-epayco', function (payload) {
+            var p = Array.isArray(payload) ? payload[0] : payload;
+
+            var handler = ePayco.checkout.configure({
+                key: "{{ env('EPAYCO_PUBLIC_KEY') }}",
+                test: {{ env('EPAYCO_TESTING', 'true') ? 'true' : 'false' }}
+            });
+
+            handler.open({
+                name: "Compra en {{ config('app.name') }}",
+                description: "Compra de productos para mascotas",
+                invoice: "ORD-" + p.orderId,
+                currency: "cop",
+                amount: p.total,
+                tax_base: "0",
+                tax: "0",
+                country: "co",
+                lang: "es",
+                external: "false",
+                name_billing: p.name,
+                address_billing: p.address,
+                mobile_phone_billing: p.phone,
+                email_billing: p.email,
+                number_doc_billing: "",
+                response: "{{ route('epayco.response') }}",
+                confirmation: "{{ route('epayco.confirmation') }}",
+            });
+        });
+    });
+</script>

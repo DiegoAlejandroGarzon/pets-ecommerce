@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,8 +19,6 @@ Route::get('/checkout', function () {
     return view('checkout');
 })->name('checkout');
 
-use App\Http\Controllers\PaymentController;
-
 Route::get('/payment/success/{order}', [PaymentController::class, 'success'])->name('payment.success');
 Route::get('/payment/failure/{order}', [PaymentController::class, 'failure'])->name('payment.failure');
 Route::get('/payment/pending/{order}', [PaymentController::class, 'pending'])->name('payment.pending');
@@ -32,3 +31,6 @@ Route::get('/success', function () {
 Route::get('/cart', function () {
     return view('cart');
 })->name('cart');
+
+Route::get('/epayco/response', [App\Http\Controllers\EpaycoController::class, 'response'])->name('epayco.response');
+Route::post('/epayco/confirmation', [App\Http\Controllers\EpaycoController::class, 'confirmation'])->name('epayco.confirmation');
