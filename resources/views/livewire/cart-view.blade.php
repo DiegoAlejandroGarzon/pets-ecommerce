@@ -16,6 +16,22 @@ $removeFromCart = function ($id) {
     $this->dispatch('cart-updated');
 };
 
+$updateQuantity = function ($id, $delta) {
+    $cart = session()->get('cart', []);
+    if (!isset($cart[$id])) return;
+
+    $newQty = $cart[$id]['quantity'] + $delta;
+    if ($newQty <= 0) {
+        unset($cart[$id]);
+    } else {
+        $cart[$id]['quantity'] = $newQty;
+    }
+
+    session()->put('cart', $cart);
+    $this->cart = $cart;
+    $this->dispatch('cart-updated');
+};
+
 $total = computed(function () {
     return array_reduce($this->cart, function ($carry, $item) {
         return $carry + ($item['price'] * $item['quantity']);
@@ -43,10 +59,15 @@ $total = computed(function () {
                         </div>
                         <div class="flex-1">
                             <h3 class="text-xl font-bold text-gray-900">{{ $item['name'] }}</h3>
-                            <p class="text-gray-500">${{ number_format($item['price'], 2) }} x {{ $item['quantity'] }}</p>
+                            <p class="text-sm text-gray-500">${{ number_format($item['price'], 0, ',', '.') }} c/u</p>
+                            <div class="flex items-center gap-3 mt-3">
+                                <button wire:click="updateQuantity({{ $id }}, -1)" class="w-8 h-8 flex items-center justify-center border-2 border-gray-200 rounded-lg font-bold hover:border-orange-500 hover:text-orange-600 transition">-</button>
+                                <span class="font-bold text-lg w-6 text-center">{{ $item['quantity'] }}</span>
+                                <button wire:click="updateQuantity({{ $id }}, 1)" class="w-8 h-8 flex items-center justify-center border-2 border-gray-200 rounded-lg font-bold hover:border-orange-500 hover:text-orange-600 transition">+</button>
+                            </div>
                         </div>
                         <div class="text-xl font-black text-gray-900">
-                            ${{ number_format($item['price'] * $item['quantity'], 2) }}
+                            ${{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                         </div>
                         <button wire:click="removeFromCart({{ $id }})" class="text-gray-400 hover:text-red-600 transition">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

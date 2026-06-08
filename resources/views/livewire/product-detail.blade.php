@@ -112,6 +112,12 @@ $addToCart = function () {
                 <button wire:click="addToCart" class="flex-1 bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-700 transition duration-150 shadow-lg shadow-orange-200">
                     Añadir al carrito
                 </button>
+                <a href="{{ route('cart') }}" class="flex items-center gap-2 border-2 border-gray-900 text-gray-900 px-5 py-4 rounded-xl font-bold hover:bg-gray-900 hover:text-white transition duration-150">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    Ver carrito
+                </a>
             </div>
         </div>
     </div>
