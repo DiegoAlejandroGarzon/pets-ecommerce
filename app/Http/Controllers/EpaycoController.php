@@ -57,18 +57,33 @@ class EpaycoController extends Controller
         $data = $request->all();
         Log::info('ePayco Confirmation Received', $data);
 
-        // Validar firma: sha256(p_cust_id_client + p_key + x_ref_payco + x_transaction_id + x_amount + x_currency_code)
+        // Firma: sha256(p_cust_id_client + p_key + x_ref_payco + x_transaction_id + x_amount + x_currency_code)
+        // ePayco envía x_amount con 2 decimales, ej: "10000.00"
+        $amount = number_format((float) ($data['x_amount'] ?? 0), 2, '.', '');
+
         $signature_local = hash('sha256',
             env('EPAYCO_P_CUST_ID_CLIENT') .
             env('EPAYCO_P_KEY') .
             ($data['x_ref_payco'] ?? '') .
             ($data['x_transaction_id'] ?? '') .
-            ($data['x_amount'] ?? '') .
+            $amount .
             ($data['x_currency_code'] ?? '')
         );
 
+        Log::info('ePayco firma debug', [
+            'cust_id'        => env('EPAYCO_P_CUST_ID_CLIENT'),
+            'p_key'          => substr(env('EPAYCO_P_KEY'), 0, 6) . '...',
+            'x_ref_payco'    => $data['x_ref_payco'] ?? '',
+            'x_transaction_id' => $data['x_transaction_id'] ?? '',
+            'x_amount_raw'   => $data['x_amount'] ?? '',
+            'x_amount_used'  => $amount,
+            'x_currency_code' => $data['x_currency_code'] ?? '',
+            'firma_calculada' => $signature_local,
+            'firma_recibida'  => $data['x_signature'] ?? '',
+        ]);
+
         if ($signature_local !== ($data['x_signature'] ?? '')) {
-            Log::warning('ePayco: firma inválida', ['received' => $data['x_signature'] ?? null, 'expected' => $signature_local]);
+            Log::warning('ePayco: firma inválida');
             return response('Invalid Signature', 400);
         }
 
