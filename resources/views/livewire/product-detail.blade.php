@@ -72,9 +72,16 @@ $addToCart = function () {
                 <div class="text-3xl font-bold text-orange-600">
                     ${{ number_format($this->selectedVariant->price, 0, ',', '.') }}
                 </div>
-                @if($this->selectedVariant->weight)
+                @if($this->selectedVariant->presentation || $this->selectedVariant->weight)
                     <div class="mt-1 text-sm text-gray-500 font-medium">
-                        Presentación: <span class="text-gray-700">{{ $this->selectedVariant->weight }} kg</span>
+                        Presentación:
+                        <span class="text-gray-700">
+                            {{ $this->selectedVariant->presentation }}
+                            @if($this->selectedVariant->weight)
+                                {{ $this->selectedVariant->presentation ? '·' : '' }}
+                                {{ rtrim(rtrim((string) $this->selectedVariant->weight, '0'), '.') }} {{ $this->selectedVariant->weight_unit }}
+                            @endif
+                        </span>
                     </div>
                 @endif
             </div>
@@ -93,8 +100,14 @@ $addToCart = function () {
                                 class="border-2 p-3 rounded-xl text-left transition duration-150 {{ $selectedVariantId === $variant->id ? 'border-orange-600 bg-orange-50' : 'border-gray-200 hover:border-orange-300' }}"
                             >
                                 <span class="block font-bold text-sm">{{ implode(', ', $variant->attributes ?? ['Estándar']) }}</span>
-                                @if($variant->weight)
-                                    <span class="block text-xs text-gray-500">{{ $variant->weight }} kg</span>
+                                @if($variant->presentation || $variant->weight)
+                                    <span class="block text-xs text-gray-500">
+                                        {{ $variant->presentation }}
+                                        @if($variant->weight)
+                                            {{ $variant->presentation ? '·' : '' }}
+                                            {{ rtrim(rtrim((string) $variant->weight, '0'), '.') }} {{ $variant->weight_unit }}
+                                        @endif
+                                    </span>
                                 @endif
                                 <span class="block text-sm font-semibold text-orange-600 mt-1">${{ number_format($variant->price, 0, ',', '.') }}</span>
                             </button>

@@ -10,6 +10,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -36,8 +37,20 @@ class VariantsRelationManager extends RelationManager
                     ->default(0)
                     ->required(),
                 TextInput::make('weight')
-                    ->numeric()
-                    ->suffix('kg'),
+                    ->numeric(),
+                Select::make('weight_unit')
+                    ->label('Unidad de peso')
+                    ->options([
+                        'kg' => 'Kilogramos (kg)',
+                        'g' => 'Gramos (g)',
+                        'unidad' => 'Unidad',
+                    ])
+                    ->default('kg')
+                    ->required(),
+                TextInput::make('presentation')
+                    ->label('Presentación')
+                    ->placeholder('Ej: Tarro, Bolsa, Caja')
+                    ->datalist(['Tarro', 'Bolsa', 'Caja', 'Frasco', 'Sobre']),
                 TextInput::make('dimensions')
                     ->placeholder('L x W x H'),
                 \Filament\Forms\Components\KeyValue::make('attributes')
@@ -59,8 +72,14 @@ class VariantsRelationManager extends RelationManager
                 TextColumn::make('stock')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('presentation')
+                    ->label('Presentación')
+                    ->placeholder('—'),
                 TextColumn::make('weight')
-                    ->suffix(' kg'),
+                    ->label('Peso')
+                    ->formatStateUsing(fn ($record) => $record->weight !== null
+                        ? rtrim(rtrim((string) $record->weight, '0'), '.') . ' ' . $record->weight_unit
+                        : '—'),
             ])
             ->filters([
                 //

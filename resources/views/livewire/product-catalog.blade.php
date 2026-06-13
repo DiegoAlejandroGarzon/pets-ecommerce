@@ -78,7 +78,18 @@ $addToCart = function ($productId) {
                         <a href="/products/{{ $product->slug }}">{{ $product->name }}</a>
                     </h3>
                     <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ strip_tags($product->description) }}</p>
-                    
+
+                    @php $cheapestVariant = $product->variants->sortBy('price')->first(); @endphp
+                    @if($cheapestVariant && ($cheapestVariant->presentation || $cheapestVariant->weight))
+                        <div class="mt-1 text-xs text-gray-400 font-medium">
+                            {{ $cheapestVariant->presentation }}
+                            @if($cheapestVariant->weight)
+                                {{ $cheapestVariant->presentation ? '·' : '' }}
+                                {{ rtrim(rtrim((string) $cheapestVariant->weight, '0'), '.') }} {{ $cheapestVariant->weight_unit }}
+                            @endif
+                        </div>
+                    @endif
+
                     <div class="mt-4 flex items-center justify-between gap-2">
                         <span class="text-xl font-black text-gray-900">
                             ${{ number_format($product->variants->min('price'), 2) }}
